@@ -69,56 +69,74 @@ const CampaignsView: React.FC<CampaignsViewProps> = ({ client, campaigns, onAddC
     <div className="p-12 space-y-10 animate-fade-in-up h-full flex flex-col">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-4xl font-black uppercase tracking-tighter italic">Client <span className="text-indigo-500">Roadmap</span></h1>
-          <p className="text-sm text-slate-500 font-bold uppercase mt-1">Campaign Strategy & Execution</p>
+          <h1 className="font-black italic">Client <span className="text-primary-400">Roadmap</span></h1>
+          <p className="text-caption text-muted font-semibold mt-2">Campaign Strategy & Execution</p>
         </div>
         <div className="flex gap-4">
-          <button 
-            onClick={handleGenerateSuggestions}
-            disabled={isGenerating || !strategyContext}
-            className="bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-600/20 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 disabled:opacity-50"
-          >
-            {isGenerating ? <Cpu className="w-3.5 h-3.5 animate-spin" /> : <Rocket className="w-3.5 h-3.5" />} Suggest Campaigns
-          </button>
-          <button 
+          {strategyContext && (
+            <button
+              onClick={handleGenerateSuggestions}
+              disabled={isGenerating}
+              className="btn btn-outline btn-md gap-2 hover:bg-primary-500/10 hover:border-primary-500/30 hover:text-primary-400"
+            >
+              {isGenerating ? <Cpu className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
+              AI Suggestions
+            </button>
+          )}
+          <button
             onClick={() => setIsCustomModalOpen(true)}
-            className="bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 text-white"
+            className="btn btn-primary btn-md gap-2"
           >
-            <Plus className="w-3.5 h-3.5" /> Create Custom
+            <Plus className="w-4 h-4" /> Create Campaign
           </button>
         </div>
       </div>
 
       {isCustomModalOpen && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4">
-           <div className="bg-[#08080c] border border-white/5 rounded-[2.5rem] p-8 max-w-md w-full animate-scale-in">
-              <div className="flex justify-between mb-6">
-                <h3 className="text-xl font-black italic uppercase text-white">Custom Campaign</h3>
-                <button onClick={() => setIsCustomModalOpen(false)}><X className="w-5 h-5" /></button>
+           <div className="card p-8 max-w-md w-full animate-scale-in">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h3 className="text-xl font-black italic">Custom <span className="text-primary-400">Campaign</span></h3>
+                  <p className="text-caption text-muted mt-1">Create a campaign tailored to your strategy</p>
+                </div>
+                <button
+                  onClick={() => setIsCustomModalOpen(false)}
+                  className="btn btn-ghost btn-sm p-2 hover:bg-neutral-800"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <div className="space-y-4">
-                <input 
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  placeholder="Campaign Name..."
-                  className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white"
-                />
-                <select 
-                  value={customPlatform}
-                  onChange={(e) => setCustomPlatform(e.target.value)}
-                  className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white"
-                >
-                  <option>LinkedIn</option>
-                  <option>Google Ads</option>
-                  <option>Facebook</option>
-                  <option>Instagram</option>
-                  <option>Email</option>
-                </select>
-                <button 
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="form-label">Campaign Name</label>
+                  <input
+                    value={customName}
+                    onChange={(e) => setCustomName(e.target.value)}
+                    placeholder="e.g. Q1 Brand Awareness"
+                    className="form-input"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="form-label">Platform</label>
+                  <select
+                    value={customPlatform}
+                    onChange={(e) => setCustomPlatform(e.target.value)}
+                    className="form-input"
+                  >
+                    <option>LinkedIn</option>
+                    <option>Google Ads</option>
+                    <option>Facebook</option>
+                    <option>Instagram</option>
+                    <option>Email</option>
+                  </select>
+                </div>
+                <button
                   onClick={handleCreateCustom}
-                  className="w-full bg-indigo-600 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                  className="btn btn-primary btn-lg w-full gap-2"
                 >
-                  Add Campaign
+                  <Plus className="w-4 h-4" />
+                  Create Campaign
                 </button>
               </div>
            </div>
@@ -148,9 +166,36 @@ const CampaignsView: React.FC<CampaignsViewProps> = ({ client, campaigns, onAddC
               </div>
             </button>
           )) : (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-600 border border-dashed border-white/5 rounded-[3rem]">
-              <Target className="w-12 h-12 opacity-10 mb-4" />
-              <p className="text-xs font-black uppercase tracking-widest">No campaigns defined</p>
+            <div className="empty-state">
+              <Target className="empty-state-icon" />
+              <h3 className="empty-state-title">Ready to Launch Campaigns?</h3>
+              <p className="empty-state-description">
+                Create your first campaign to start building your client's marketing roadmap.
+                We'll help you generate strategic content schedules and track progress.
+              </p>
+              <div className="flex gap-3 mt-6">
+                {strategyContext ? (
+                  <button
+                    onClick={handleGenerateSuggestions}
+                    disabled={isGenerating}
+                    className="btn btn-primary btn-md gap-2"
+                  >
+                    {isGenerating ? <Cpu className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
+                    Generate AI Suggestions
+                  </button>
+                ) : (
+                  <div className="text-center">
+                    <p className="text-micro text-muted mb-4">💡 Tip: Complete strategy research first for better campaign suggestions</p>
+                  </div>
+                )}
+                <button
+                  onClick={() => setIsCustomModalOpen(true)}
+                  className="btn btn-outline btn-md gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create Custom Campaign
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -198,9 +243,21 @@ const CampaignsView: React.FC<CampaignsViewProps> = ({ client, campaigns, onAddC
                   ))}
                 </div>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-slate-600 space-y-4">
-                  <Globe className="w-16 h-16 opacity-10" />
-                  <p className="text-xs font-black uppercase tracking-widest">Awaiting Content Strategy</p>
+                <div className="empty-state">
+                  <Globe className="empty-state-icon" />
+                  <h3 className="empty-state-title">Ready for Content Strategy</h3>
+                  <p className="empty-state-description">
+                    Generate a strategic content schedule for this campaign.
+                    We'll create optimized posting times and content themes.
+                  </p>
+                  <button
+                    onClick={() => handleGenerateSchedule(activeCampaign)}
+                    disabled={isGenerating}
+                    className="btn btn-primary btn-md gap-2 mt-6"
+                  >
+                    {isGenerating ? <Cpu className="w-4 h-4 animate-spin" /> : <Calendar className="w-4 h-4" />}
+                    Generate Content Schedule
+                  </button>
                 </div>
               )}
             </div>

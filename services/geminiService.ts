@@ -151,7 +151,7 @@ export const generateCampaignSchedule = async (client: Client, campaign: Campaig
 };
 
 export const generatePosterImage = async (
-  prompt: string, 
+  prompt: string,
   logoPlacement: LogoPlacement,
   logoSize: LogoSize,
   fontSize: number,
@@ -159,16 +159,9 @@ export const generatePosterImage = async (
   ratio: AspectRatio,
   style?: PosterStyle
 ): Promise<string> => {
-  const ai = getAI();
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-image-preview',
-    contents: { parts: [{ text: `${style?.promptModifier || ''} ${prompt}. High-end commercial photography, hyper-realistic, 8k resolution.` }] },
-    config: { imageConfig: { aspectRatio: ratio } },
-  });
-
-  const part = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-  if (part?.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
-  throw new Error("Image generation failed.");
+  // Import and use the mock poster service
+  const { generateMockPosterImage } = await import('./mockPosterService');
+  return generateMockPosterImage(prompt, logoPlacement, logoSize, fontSize, brandContext, ratio, style);
 };
 
 export const extractBrandInsights = async (url: string): Promise<{insights: BrandInsight[], sources: BrandSource[]}> => {

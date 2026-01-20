@@ -18,6 +18,8 @@ interface StudioViewProps {
     client: Client;
     initialPrompt?: string;
     activeStrategy?: Strategy;
+    campaignContext?: any; // Campaign data for context
+    scheduleContext?: any; // Schedule data for context
 }
 
 const FONT_PAIRS: FontPair[] = [
@@ -37,6 +39,26 @@ const StudioView: React.FC<StudioViewProps> = ({ client, initialPrompt = '', act
     const [generatedImageUrl, setGeneratedImageUrl] = React.useState<string | null>(null);
     const [history, setHistory] = React.useState<HistoryItem[]>([]);
     const [isAnimatingCanvas, setIsAnimatingCanvas] = React.useState(false);
+    const [showDemoPosters, setShowDemoPosters] = React.useState(false); // DemoService.isDemoModeActive()
+
+    // Load demo posters if in demo mode
+    React.useEffect(() => {
+        if (showDemoPosters) {
+            const demoPosters = [
+                '/demo_posters_mark_a_studio/Generated Image January 20, 2026 - 9_36AM.png',
+                '/demo_posters_mark_a_studio/poster_2.png',
+                '/demo_posters_mark_a_studio/poster_one.png',
+                '/demo_posters_mark_a_studio/poster_three.png'
+            ];
+            const demoHistory: HistoryItem[] = demoPosters.map((url: string, index: number) => ({
+                id: `demo-${index}`,
+                imageUrl: url,
+                prompt: `Demo poster ${index + 1} for Mark A Studio`,
+                timestamp: Date.now() - (index * 1000) // Stagger timestamps
+            }));
+            setHistory(demoHistory);
+        }
+    }, [showDemoPosters]);
 
     const [brandContext, setBrandContext] = React.useState<BrandContext>({
         websiteUrl: client.website,
@@ -77,9 +99,78 @@ const StudioView: React.FC<StudioViewProps> = ({ client, initialPrompt = '', act
       }
     };
 
+    // Context-aware initialization
+    React.useEffect(() => {
+        if (initialPrompt && initialPrompt !== mainPrompt) {
+            setMainPrompt(initialPrompt);
+        }
+    }, [initialPrompt]);
+
     return (
         <div className="p-12 space-y-8 animate-fade-in-up h-full flex flex-col">
-            <h1 className="text-4xl font-black uppercase tracking-tighter italic text-white">Studio <span className="text-pink-500">Canvas</span></h1>
+            {/* Enhanced Header with Breadcrumb Navigation */}
+            <div className="space-y-6">
+                {/* Breadcrumb */}
+                <nav className="flex items-center space-x-2 text-caption text-muted">
+                    <button onClick={() => {}} className="text-primary-400 hover:text-primary-300 transition-colors">Client</button>
+                    <span className="text-neutral-600">→</span>
+                    <button onClick={() => {}} className="text-primary-400 hover:text-primary-300 transition-colors">Campaigns</button>
+                    <span className="text-neutral-600">→</span>
+                    <button onClick={() => {}} className="text-primary-400 hover:text-primary-300 transition-colors">Content Schedule</button>
+                    <span className="text-neutral-600">→</span>
+                    <span className="text-primary-400 font-semibold">Creative Studio</span>
+                </nav>
+
+                {/* Header */}
+                <div className="flex justify-between items-end">
+                    <div>
+                        <h1 className="font-black italic">Creative <span className="text-primary-400">Studio</span></h1>
+                        <p className="text-caption text-muted font-semibold mt-2">Design & generate marketing assets for {client.name}</p>
+                    </div>
+
+                    {/* Context Indicators */}
+                    <div className="flex items-center gap-3">
+                        {activeStrategy && (
+                            <div className="badge badge-success gap-1">
+                                <Target className="w-3 h-3" />
+                                Strategy Connected
+                            </div>
+                        )}
+                        {initialPrompt && (
+                            <div className="badge badge-primary gap-1">
+                                <Text className="w-3 h-3" />
+                                Brief Loaded
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Workflow Progress */}
+                <div className="flex items-center gap-4 p-4 card">
+                    <div className="flex items-center gap-2 text-caption text-muted">
+                        <div className="w-2 h-2 rounded-full bg-success-500"></div>
+                        <span>Strategy</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-caption text-muted">
+                        <div className="w-2 h-2 rounded-full bg-success-500"></div>
+                        <span>Campaign</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-caption text-muted">
+                        <div className="w-2 h-2 rounded-full bg-success-500"></div>
+                        <span>Schedule</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-caption text-primary font-semibold">
+                        <div className="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></div>
+                        <span>Studio</span>
+                    </div>
+                    <div className="flex-1 h-px bg-neutral-700"></div>
+                    <div className="flex items-center gap-2 text-caption text-muted">
+                        <div className="w-2 h-2 rounded-full bg-neutral-600"></div>
+                        <span>Publish</span>
+                    </div>
+                </div>
+            </div>
+
             <div className="flex-1 grid grid-cols-12 gap-8 relative">
                 <div className="col-span-4 bg-[#08080c] border border-white/5 rounded-[2.5rem] p-8 overflow-y-auto custom-scrollbar space-y-8 shadow-2xl">
                     <section className="space-y-4">

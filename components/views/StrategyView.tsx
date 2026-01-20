@@ -133,39 +133,75 @@ const StrategyView: React.FC<StrategyViewProps> = ({ client, onStrategyUpdated, 
 
   if (!existingStrategy) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-12 text-center space-y-8 animate-fade-in-up">
-        <div className="w-32 h-32 bg-[#08080c] border border-white/5 rounded-full flex items-center justify-center shadow-2xl">
-          <Target className="w-12 h-12 text-slate-800" />
+      <div className="p-12 animate-fade-in-up h-full flex flex-col">
+        <div className="flex justify-between items-end mb-12">
+          <div>
+            <h1 className="font-black italic">Research & <span className="text-primary-400">Strategy</span></h1>
+            <p className="text-caption text-muted font-semibold mt-2">AI-powered market intelligence for {client.name}</p>
+          </div>
         </div>
-        <div className="max-w-md space-y-4">
-          <h2 className="text-3xl font-black uppercase tracking-tighter italic text-white">Brand <span className="text-indigo-500">Intelligence</span></h2>
-          <p className="text-sm text-slate-500 font-medium leading-relaxed">
-            Generate a research-grounded growth blueprint for <strong>{client.name}</strong> covering ICP, Personas, and Market Gaps.
-          </p>
-          
-          {error && (
-            <div className="p-5 bg-rose-500/10 border border-rose-500/20 rounded-[2rem] flex flex-col gap-4 text-rose-400 text-xs font-bold mb-4 max-w-sm mx-auto shadow-2xl">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 shrink-0" />
-                <span className="text-left leading-tight">
-                  {isQuotaError ? "API Quota Exhausted. This feature requires a paid API key with Search Grounding enabled." : error}
-                </span>
-              </div>
-              {isQuotaError && (
-                <button 
-                  onClick={handleOpenSelectKey}
-                  className="w-full bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 py-3.5 rounded-xl border border-rose-500/30 flex items-center justify-center gap-2 transition-all font-black uppercase tracking-widest"
-                >
-                  <KeyRound className="w-4 h-4" />
-                  Select Paid API Key
-                </button>
-              )}
-            </div>
-          )}
 
-          <button onClick={handleGenerate} className="bg-indigo-600 hover:bg-indigo-500 px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3 mx-auto transition-all group shadow-xl shadow-indigo-500/10 active:scale-95">
-            <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" /> Start Deep Research
-          </button>
+        <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8">
+          <div className="empty-state max-w-2xl">
+            <Target className="empty-state-icon" />
+            <h2 className="empty-state-title">Unlock Strategic Intelligence</h2>
+            <p className="empty-state-description">
+              Generate a comprehensive research dossier that uncovers your client's ideal customer profile,
+              competitive landscape, and strategic opportunities. Our AI analyzes web data, market trends,
+              and industry insights to create actionable growth strategies.
+            </p>
+
+            <div className="grid grid-cols-3 gap-4 mt-8 mb-8 text-center">
+              <div className="p-4 rounded-xl bg-neutral-900/50 border border-neutral-800">
+                <UserCheck className="w-6 h-6 text-primary-400 mx-auto mb-2" />
+                <p className="text-micro font-semibold text-primary">ICP Analysis</p>
+              </div>
+              <div className="p-4 rounded-xl bg-neutral-900/50 border border-neutral-800">
+                <ShieldAlert className="w-6 h-6 text-primary-400 mx-auto mb-2" />
+                <p className="text-micro font-semibold text-primary">Market Gaps</p>
+              </div>
+              <div className="p-4 rounded-xl bg-neutral-900/50 border border-neutral-800">
+                <BarChart3 className="w-6 h-6 text-primary-400 mx-auto mb-2" />
+                <p className="text-micro font-semibold text-primary">Channel Strategy</p>
+              </div>
+            </div>
+
+            {error && (
+              <div className="card card-body max-w-md text-error-400">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                  <div className="text-left">
+                    <p className="text-body font-semibold mb-2">
+                      {isQuotaError ? "API Quota Exhausted" : "Research Failed"}
+                    </p>
+                    <p className="text-caption">
+                      {isQuotaError
+                        ? "This feature requires a paid API key with Search Grounding enabled."
+                        : error
+                      }
+                    </p>
+                  </div>
+                </div>
+                {isQuotaError && (
+                  <button
+                    onClick={handleOpenSelectKey}
+                    className="btn btn-outline btn-md w-full gap-2 mt-4 hover:bg-error-500/10 hover:border-error-500/30"
+                  >
+                    <KeyRound className="w-4 h-4" />
+                    Select Paid API Key
+                  </button>
+                )}
+              </div>
+            )}
+
+            <button
+              onClick={handleGenerate}
+              className="btn btn-primary btn-xl gap-3 group"
+            >
+              <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+              Start Deep Research
+            </button>
+          </div>
         </div>
       </div>
     );

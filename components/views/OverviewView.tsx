@@ -16,7 +16,7 @@ interface OverviewViewProps {
 const OverviewView: React.FC<OverviewViewProps> = ({ client, campaigns, activities }) => {
     const totalBudget = campaigns.reduce((acc, c) => acc + parseInt(c.budget.replace(/[^0-9]/g, '') || '0'), 0);
     const activeCampaigns = campaigns.filter(c => c.status === 'Active').length;
-    
+
     // Dynamic engagement calculation based on campaign count
     const baseEngagement = 5.4;
     const dynamicEngagement = (baseEngagement + (activeCampaigns * 1.2)).toFixed(1);
@@ -38,61 +38,74 @@ const OverviewView: React.FC<OverviewViewProps> = ({ client, campaigns, activiti
         <div className="p-12 space-y-10 animate-fade-in-up">
             <div className="flex justify-between items-start">
                 <div>
-                    <h1 className="text-4xl font-black uppercase tracking-tighter italic">Client <span className="text-indigo-500">Overview</span></h1>
-                    <p className="text-sm text-slate-500 font-bold uppercase mt-1">Status Report for: {client.name}</p>
+                    <h1 className="font-black italic">Client <span className="text-primary-400">Overview</span></h1>
+                    <p className="text-caption text-muted font-semibold mt-2">Status Report for: {client.name}</p>
                 </div>
                 {client.phoneNumber && (
-                  <button 
+                  <button
                     onClick={handleWhatsApp}
-                    className="flex items-center gap-3 px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-emerald-500/20 shadow-lg"
+                    className="btn btn-outline btn-md gap-3 hover:bg-success-500/10 hover:border-success-500/30 hover:text-success-400"
                   >
                     <MessageSquare className="w-4 h-4" /> Contact via WhatsApp
                   </button>
                 )}
             </div>
 
-            <div className="grid grid-cols-4 gap-8">
+            <div className="grid-mobile">
                 {kpis.map(kpi => (
-                    <div key={kpi.label} className="bg-[#08080c] border border-white/5 p-6 rounded-[2rem]">
+                    <div key={kpi.label} className="card card-body hover:border-neutral-700 transition-all touch-target">
                         <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center ${kpi.color}`}>
-                                <kpi.icon className="w-5 h-5" />
+                            <div className={`w-12 h-12 rounded-xl bg-primary-500/10 flex items-center justify-center border border-primary-500/20 ${kpi.color.replace('text-', 'text-')}`}>
+                                <kpi.icon className="w-6 h-6" />
                             </div>
-                            <div>
-                                <p className="text-2xl font-black text-white">{kpi.value}</p>
-                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{kpi.label}</p>
+                            <div className="flex-1">
+                                <p className="mobile-heading font-black text-primary">{kpi.value}</p>
+                                <p className="text-caption text-muted font-semibold uppercase tracking-wide">{kpi.label}</p>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="grid grid-cols-5 gap-8">
-                <div className="col-span-3 bg-[#08080c] border border-white/5 p-8 rounded-[2.5rem]">
-                     <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2"><BarChart2 className="w-4 h-4" /> Campaign Performance (Q2)</h3>
-                     <div className="h-64 flex items-end gap-3">
-                        {[40, 65, 30, 85, 45, 95, 70, 55, 90, 60, 100].map((h, i) => (
-                           <div key={i} className="flex-1 bg-gradient-to-t from-indigo-600/50 to-indigo-600/0 rounded-t-lg border-t-2 border-indigo-500" style={{ height: `${h}%` }}></div>
-                        ))}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
+                <div className="col-span-1 md:col-span-3 card">
+                     <div className="card-header">
+                        <h3 className="text-caption text-muted font-semibold uppercase tracking-wide flex items-center gap-2">
+                            <BarChart2 className="w-4 h-4 text-primary-400" /> Campaign Performance (Q2)
+                        </h3>
+                     </div>
+                     <div className="card-body">
+                        <div className="h-48 md:h-64 flex items-end gap-2 md:gap-3">
+                           {[40, 65, 30, 85, 45, 95, 70, 55, 90, 60, 100].map((h, i) => (
+                              <div key={i} className="flex-1 bg-gradient-to-t from-primary-500/50 to-primary-500/0 rounded-t-lg border-t-2 border-primary-500" style={{ height: `${h}%` }}></div>
+                           ))}
+                        </div>
                      </div>
                 </div>
-                <div className="col-span-2 bg-[#08080c] border border-white/5 p-8 rounded-[2.5rem]">
-                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2"><Clock className="w-4 h-4" /> Recent Activity</h3>
-                    <div className="space-y-4">
-                        {activities.length > 0 ? activities.map((item, idx) => (
-                            <div key={idx} className="flex items-start gap-3">
-                                <div className="w-3 h-3 bg-indigo-500/20 rounded-full mt-1 border border-indigo-500/30"></div>
-                                <div>
-                                    <p className="text-sm font-bold text-slate-300">{item.action}</p>
-                                    <p className="text-xs text-slate-600">{item.time}</p>
+                <div className="col-span-1 md:col-span-2 card">
+                    <div className="card-header">
+                        <h3 className="text-caption text-muted font-semibold uppercase tracking-wide flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-primary-400" /> Recent Activity
+                        </h3>
+                    </div>
+                    <div className="card-body">
+                        <div className="space-y-4 max-h-48 md:max-h-none overflow-y-auto custom-scrollbar">
+                            {activities.length > 0 ? activities.map((item, idx) => (
+                                <div key={idx} className="flex items-start gap-3">
+                                    <div className="w-3 h-3 bg-primary-500/20 rounded-full mt-1.5 border border-primary-500/30"></div>
+                                    <div>
+                                        <p className="text-body text-secondary font-medium">{item.action}</p>
+                                        <p className="text-caption text-muted">{item.time}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        )) : (
-                          <div className="flex flex-col items-center justify-center py-12 opacity-20">
-                             <Clock className="w-10 h-10 mb-2" />
-                             <p className="text-[10px] font-black uppercase">No recent events</p>
-                          </div>
-                        )}
+                            )) : (
+                              <div className="empty-state py-8">
+                                 <Clock className="empty-state-icon" />
+                                 <p className="empty-state-title">No recent events</p>
+                                 <p className="empty-state-description">Activity will appear here as campaigns progress</p>
+                              </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

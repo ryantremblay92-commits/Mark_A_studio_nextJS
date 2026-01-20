@@ -6,8 +6,8 @@
 "use client";
 
 import * as React from 'react';
-import { 
-  Zap, FileText, Cpu, Target, Search, Plus
+import {
+  Zap, FileText, Cpu, Target, Search, Plus, Menu, X, Building, DollarSign, ShieldCheck, LogOut
 } from 'lucide-react';
 import { 
   AppState, LogoPlacement, LogoSize, BrandContext, HistoryItem, AspectRatio, FontPair, Client, Campaign, CrmDeal, Lead, Strategy, Message, ManagedFile, Task, TaskType, ChannelConnection, ContextFile,
@@ -15,12 +15,13 @@ import {
 } from './types';
 import { 
   generatePosterImage, 
-  extractBrandInsights,
-  enhancePrompt,
+  extractBrandInsights, 
+  enhancePrompt, 
   generateProposal
 } from './services/geminiService';
 import { discoverLeads } from './services/leadGenerationService';
 import { saveAgencyData, loadAgencyData } from './services/storageService';
+import { DemoService } from './services/demoService';
 import GenericApiKeyDialog from './components/GenericApiKeyDialog';
 import ClientSidebar from './components/ClientSidebar';
 import LeadDiscoveryModal from './components/views/LeadDiscoveryModal';
@@ -47,6 +48,13 @@ const App: React.FC = () => {
   // --- AUTH STATE ---
   const [currentUser, setCurrentUser] = React.useState<User | null>(null);
   const [currentAgency, setCurrentAgency] = React.useState<Agency | null>(null);
+
+  // --- MOBILE NAVIGATION ---
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
+  const handleCloseMobileMenu = React.useCallback(() => {
+    setIsMobileMenuOpen(false);
+  }, []);
 
   // --- APP STATE ---
   const [appState, setAppState] = React.useState<AppState>(AppState.IDLE);
@@ -111,9 +119,22 @@ const App: React.FC = () => {
 
   // --- HANDLERS ---
 
-  const handleLogin = (user: User, agency: Agency) => {
+  const handleLogin = async (user: User, agency: Agency, useDemo?: boolean) => {
     setCurrentUser(user);
     setCurrentAgency(agency);
+
+    // Load demo client if requested
+    if (useDemo) {
+      try {
+        const demoClient = await DemoService.loadDemoClient();
+        setClients([demoClient]);
+        setActiveClientId(demoClient.id);
+        setActiveView('OVERVIEW');
+      } catch (error) {
+        console.error('Failed to load demo client:', error);
+        // Continue with normal login even if demo fails
+      }
+    }
   };
 
   const handleLogout = () => {
@@ -189,11 +210,159 @@ const App: React.FC = () => {
         if (!activeClient) return <ClientViewPlaceholder viewName="Select a Client" />;
         return <ScheduleView campaigns={currentClientCampaigns} clientName={activeClient.name} />;
 
-      case 'STUDIO': 
+      case 'STUDIO':
         if (!activeClient) return <ClientViewPlaceholder viewName="Select a Client" />;
-        return <StudioView client={activeClient} activeStrategy={currentClientStrategy} />;
+        return <StudioView
+          client={activeClient}
+          activeStrategy={currentClientStrategy}
+          campaignContext={currentClientCampaigns}
+          scheduleContext={{}} // Will be populated when schedule data is available
+        />;
       
       case 'PRICING': return <PricingView />;
+
+      case 'AGENCY_OVERVIEW': return (
+        <div className="p-12 space-y-10 animate-fade-in-up">
+          <div className="flex justify-between items-end">
+            <div>
+              <h1 className="font-black italic">Agency <span className="text-primary-400">Dashboard</span></h1>
+              <p className="text-caption text-muted font-semibold mt-2">Business overview and performance metrics</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="card card-body">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
+                  <Building className="w-6 h-6 text-primary-400" />
+                </div>
+                <div>
+                  <p className="text-body-large font-black text-primary">{clients.length}</p>
+                  <p className="text-caption text-muted font-semibold uppercase tracking-wide">Active Clients</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="card card-body">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-success-500/10 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-success-500" />
+                </div>
+                <div>
+                  <p className="text-body-large font-black text-success-500">${clients.reduce((sum, c) => sum + (Number(c.monthlyBudget) || 0), 0).toLocaleString()}</p>
+                  <p className="text-caption text-muted font-semibold uppercase tracking-wide">Monthly Recurring Revenue</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="card card-body">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-warning-500/10 rounded-xl flex items-center justify-center">
+                  <Target className="w-6 h-6 text-warning-500" />
+                </div>
+                <div>
+                  <p className="text-body-large font-black text-warning-500">{Math.round(deals.filter(d => d.status === 'Won').length / Math.max(deals.length, 1) * 100)}%</p>
+                  <p className="text-caption text-muted font-semibold uppercase tracking-wide">Conversion Rate</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="card">
+              <div className="card-header">
+                <h3 className="text-caption text-muted font-semibold uppercase tracking-wide">Client Portfolio</h3>
+              </div>
+              <div className="card-body">
+                <div className="space-y-4">
+                  {clients.length > 0 ? clients.map(client => (
+                    <div key={client.id} className="flex items-center justify-between p-3 bg-neutral-800/50 rounded-lg">
+                      <div>
+                        <p className="text-body font-semibold text-primary">{client.name}</p>
+                        <p className="text-micro text-muted">{client.industry}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-caption font-semibold text-success-500">${client.monthlyBudget || 0}/mo</p>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="empty-state py-8">
+                      <Building className="empty-state-icon" />
+                      <p className="empty-state-title">No clients yet</p>
+                      <p className="empty-state-description">Start by onboarding your first client</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card-header">
+                <h3 className="text-caption text-muted font-semibold uppercase tracking-wide">Revenue Trends</h3>
+              </div>
+              <div className="card-body">
+                <div className="h-32 flex items-end gap-3">
+                  {[30, 45, 35, 65, 55, 80, 75, 90, 85, 95, 88, 100].map((h, i) => (
+                    <div key={i} className="flex-1 bg-gradient-to-t from-primary-500/50 to-primary-500/0 rounded-t-lg border-t-2 border-primary-500" style={{ height: `${h}%` }}></div>
+                  ))}
+                </div>
+                <div className="flex justify-between mt-4 text-caption text-muted">
+                  <span>Jan</span>
+                  <span>Jun</span>
+                  <span>Dec</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <button
+              onClick={() => setIsLeadDiscoveryOpen(true)}
+              className="card card-body hover:border-primary-500/50 transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center group-hover:bg-primary-500/20 transition-colors">
+                  <Search className="w-6 h-6 text-primary-400" />
+                </div>
+                <div>
+                  <h4 className="text-body font-semibold text-primary">Discover Leads</h4>
+                  <p className="text-caption text-muted">Find new business opportunities</p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveView('PRICING')}
+              className="card card-body hover:border-primary-500/50 transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center group-hover:bg-primary-500/20 transition-colors">
+                  <DollarSign className="w-6 h-6 text-primary-400" />
+                </div>
+                <div>
+                  <h4 className="text-body font-semibold text-primary">Pricing & Rates</h4>
+                  <p className="text-caption text-muted">Manage your rate sheets and pricing strategy</p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveView('ONBOARDING')}
+              className="card card-body hover:border-success-500/50 transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-success-500/10 rounded-xl flex items-center justify-center group-hover:bg-success-500/20 transition-colors">
+                  <Plus className="w-6 h-6 text-success-400" />
+                </div>
+                <div>
+                  <h4 className="text-body font-semibold text-primary">Add New Client</h4>
+                  <p className="text-caption text-muted">Onboard a new client to your agency</p>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+      );
       
       case 'TASKS':
          if (!activeClient) return <ClientViewPlaceholder viewName="Select a Client" />;
@@ -278,27 +447,45 @@ const App: React.FC = () => {
 
   return (
     <div className="h-full flex bg-gray-900 overflow-hidden">
-      <ClientSidebar 
-        client={activeClient || { name: 'No Client Selected' } as Client} 
-        clients={clients} 
+      <ClientSidebar
+        client={activeClient || { name: 'No Client Selected', id: '', industry: '', website: '', primaryObjective: '', monthlyBudget: 0, brandVoice: '', painPoints: [] }}
+        clients={clients}
         activeView={activeView}
-        onViewChange={setActiveView} 
+        onViewChange={setActiveView}
         onClientChange={setActiveClientId}
         currentAgency={currentAgency}
         currentUser={currentUser}
         onLogout={handleLogout}
+        isAgencyMode={!activeClient}
       />
-      <main className="flex-1 h-full overflow-y-auto custom-scrollbar">
-        {renderActiveView()}
+      <main className="flex-1 h-full overflow-y-auto custom-scrollbar gpu-accelerated smooth-scroll">
+        <div className="p-12">
+          {renderActiveView()}
+        </div>
       </main>
       <LeadDiscoveryModal
         isOpen={isLeadDiscoveryOpen} onClose={() => setIsLeadDiscoveryOpen(false)}
-        onSearch={async (c, l) => { 
-          if (!activeClient) return;
-          setAppState(AppState.DISCOVERING_LEADS); 
-          const res = await discoverLeads(activeClient, c, l); 
-          setLeadDiscoveryResults(res); 
-          setAppState(AppState.IDLE); 
+        onSearch={async (c, l) => {
+          setAppState(AppState.DISCOVERING_LEADS);
+          try {
+            // For agency-level discovery, we can discover leads without client context
+            // The service can handle general lead discovery
+            const res = await discoverLeads(activeClient || {
+              id: 'agency-discovery',
+              name: 'Agency Lead Discovery',
+              industry: 'General',
+              website: '',
+              primaryObjective: 'Business Development',
+              monthlyBudget: 0,
+              brandVoice: 'Professional',
+              painPoints: []
+            }, c, l);
+            setLeadDiscoveryResults(res);
+          } catch (error) {
+            console.error('Lead discovery failed:', error);
+          } finally {
+            setAppState(AppState.IDLE);
+          }
         }}
         onAddLead={l => setDeals(prev => [{id: `d-${Date.now()}`, title: `${l.name} Discovery`, contactName: l.name, value: 0, status: 'Lead', description: l.summary}, ...prev])}
         isLoading={appState === AppState.DISCOVERING_LEADS} results={leadDiscoveryResults} error={null}

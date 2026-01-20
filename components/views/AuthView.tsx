@@ -1,4 +1,4 @@
-
+""
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -9,7 +9,7 @@ import { User, Agency } from '../../types';
 import { registerAgency, loginUser } from '../../services/storageService';
 
 interface AuthViewProps {
-  onLogin: (user: User, agency: Agency) => void;
+  onLogin: (user: User, agency: Agency, useDemo?: boolean) => void;
 }
 
 const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
@@ -69,10 +69,10 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                 </div>
                 <h1 className="text-xl font-black uppercase tracking-widest text-white">Mark A Studio</h1>
              </div>
-             <h2 className="text-4xl font-black italic uppercase tracking-tighter text-white leading-tight mb-4">
+             <h2 className="font-black italic leading-tight mb-4">
                {mode === 'LOGIN' ? 'Welcome Back' : 'Scale Your Agency'}
              </h2>
-             <p className="text-slate-400 font-medium leading-relaxed max-w-sm">
+             <p className="text-secondary leading-relaxed max-w-sm">
                The operating system for modern marketing agencies. Manage clients, generate assets, and execute campaigns with AI.
              </p>
           </div>
@@ -97,13 +97,13 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
              
              {mode === 'REGISTER' && (
                <div className="space-y-2 animate-fade-in-up">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Agency Name</label>
+                  <label className="form-label">Agency Name</label>
                   <div className="relative">
-                     <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                     <input 
+                     <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                     <input
                        value={agencyName}
                        onChange={e => setAgencyName(e.target.value)}
-                       className="w-full bg-black/40 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-sm font-bold text-white focus:border-indigo-500 outline-none transition-all"
+                       className="form-input pl-12"
                        placeholder="Acme Marketing"
                      />
                   </div>
@@ -111,55 +111,72 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
              )}
 
              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Work Email</label>
+                <label className="form-label">Work Email</label>
                 <div className="relative">
-                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                   <input 
+                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                   <input
                      type="email"
                      value={email}
                      onChange={e => setEmail(e.target.value)}
-                     className="w-full bg-black/40 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-sm font-bold text-white focus:border-indigo-500 outline-none transition-all"
+                     className="form-input pl-12"
                      placeholder="name@agency.com"
                    />
                 </div>
              </div>
 
              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Password</label>
+                <label className="form-label">Password</label>
                 <div className="relative">
-                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                   <input 
+                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                   <input
                      type="password"
                      value={password}
                      onChange={e => setPassword(e.target.value)}
-                     className="w-full bg-black/40 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-sm font-bold text-white focus:border-indigo-500 outline-none transition-all"
+                     className="form-input pl-12"
                      placeholder="••••••••"
                    />
                 </div>
              </div>
 
              {error && (
-               <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400 font-bold text-center animate-fade-in-up">
+               <div className="p-4 bg-error-500/10 border border-error-500/20 rounded-xl text-error-400 font-semibold text-center animate-fade-in-up">
                  {error}
                </div>
              )}
 
-             <button 
+             <button
                disabled={isLoading}
-               className="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-[0_10px_30px_rgba(79,70,229,0.3)] transition-all flex items-center justify-center gap-2 group"
+               className="btn btn-primary btn-lg w-full gap-2 group"
              >
                {isLoading ? 'Processing...' : (mode === 'LOGIN' ? 'Access Workspace' : 'Launch Agency')}
                {!isLoading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
              </button>
 
-             <div className="text-center pt-4">
-               <button 
+             <div className="text-center pt-4 space-y-3">
+               <button
                  type="button"
                  onClick={() => { setMode(mode === 'LOGIN' ? 'REGISTER' : 'LOGIN'); setError(''); }}
-                 className="text-xs font-bold text-slate-500 hover:text-white transition-colors"
+                 className="btn btn-ghost btn-sm"
                >
                  {mode === 'LOGIN' ? "Don't have an account? Create Agency" : "Already registered? Login"}
                </button>
+
+               {mode === 'LOGIN' && (
+                 <div className="pt-2">
+                   <button
+                     type="button"
+                     onClick={() => {
+                       const demoUser: User = { id: 'demo-user', email: 'demo@markastudio.com', name: 'Demo User', agencyId: 'demo-agency', role: 'ADMIN' };
+                       const demoAgency: Agency = { id: 'demo-agency', name: 'Mark A Studio Demo', plan: 'PRO', createdAt: Date.now() };
+                       onLogin(demoUser, demoAgency, true);
+                     }}
+                     className="btn btn-ghost btn-sm gap-1 text-primary-400 hover:text-primary-300"
+                   >
+                     <Cpu className="w-3 h-3" />
+                     Try Demo Mode
+                   </button>
+                 </div>
+               )}
              </div>
           </form>
         </div>
