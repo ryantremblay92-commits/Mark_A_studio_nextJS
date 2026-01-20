@@ -12,8 +12,8 @@ interface GenericApiKeyDialogProps {
 const GenericApiKeyDialog: React.FC<GenericApiKeyDialogProps> = ({ onContinue }) => {
 
   const handleOpenSelectKey = async () => {
-    if (window.aistudio) {
-      await window.aistudio.openSelectKey();
+    if ((window as any).aistudio) {
+      await (window as any).aistudio.openSelectKey();
       onContinue(); // Call onContinue after attempting to open the key selection
     } else {
       console.error("window.aistudio is not available.");

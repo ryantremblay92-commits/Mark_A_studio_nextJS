@@ -33,8 +33,8 @@ const StrategyView: React.FC<StrategyViewProps> = ({ client, onStrategyUpdated, 
   const [isQuotaError, setIsQuotaError] = useState(false);
 
   const handleOpenSelectKey = async () => {
-    if (window.aistudio) {
-      await window.aistudio.openSelectKey();
+    if ((window as any).aistudio) {
+      await (window as any).aistudio.openSelectKey();
       // Reset error state so user can try again after selecting their new/paid key
       setError(null);
       setIsQuotaError(false);

@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "react-dom": "^19.2.0",
+    "react-dom": "^18.3.1",
     "react": "^18.3.1",
     "@google/genai": "^1.22.0",
     "lucide-react": "^0.545.0",

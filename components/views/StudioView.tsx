@@ -67,7 +67,7 @@ const StudioView: React.FC<StudioViewProps> = ({ client, initialPrompt = '', act
         setIsAnimatingCanvas(false);
 
         const enhanced = await enhancePrompt(mainPrompt, brandContext, activeStrategy);
-        const imageUrl = await generatePosterImage(enhanced, posterData.logoPlacement, posterData.logoSize, posterData.fontSize, brandContext, posterData.aspectRatio, selectedStyle);
+        const imageUrl = await generatePosterImage(enhanced, posterData.logoPlacement, posterData.logoSize, posterData.fontSize, brandContext, posterData.aspectRatio, selectedStyle || DEFAULT_STYLES[0]);
         setGeneratedImageUrl(imageUrl);
         setHistory(prev => [...prev, { id: `h-${Date.now()}`, imageUrl, prompt: enhanced, timestamp: Date.now() }]);
       } catch (e: any) {
